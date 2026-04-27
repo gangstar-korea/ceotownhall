@@ -133,6 +133,70 @@
       user-select: none;
     }
 
+    .music-button {
+      position: fixed;
+      left: 50%;
+      top: 62%;
+      z-index: 30;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-width: min(520px, calc(100vw - 42px));
+      min-height: 92px;
+      padding: 18px 34px;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(255, 255, 255, 0.74);
+      border-radius: 999px;
+      color: #07101d;
+      background: linear-gradient(135deg, #ffffff 0%, #72d6ff 54%, #ffcf5a 100%);
+      box-shadow:
+        0 22px 80px rgba(0, 0, 0, 0.42),
+        0 0 0 12px rgba(255, 255, 255, 0.12),
+        0 0 44px rgba(114, 214, 255, 0.36);
+      backdrop-filter: blur(14px);
+      font: inherit;
+      font-size: clamp(28px, 3.6vw, 48px);
+      font-weight: 900;
+      line-height: 1.1;
+      cursor: pointer;
+      animation: music-cta 1.8s ease-in-out infinite;
+    }
+
+    .music-button::before {
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 16px solid transparent;
+      border-bottom: 16px solid transparent;
+      border-left: 25px solid #07101d;
+      transform: translateX(4px);
+    }
+
+    .music-button:hover {
+      filter: brightness(1.06);
+      transform: translate(-50%, -50%) scale(1.02);
+    }
+
+    .music-button.hidden {
+      display: none;
+    }
+
+    @keyframes music-cta {
+      0%, 100% {
+        box-shadow:
+          0 22px 80px rgba(0, 0, 0, 0.42),
+          0 0 0 12px rgba(255, 255, 255, 0.12),
+          0 0 44px rgba(114, 214, 255, 0.36);
+      }
+      50% {
+        box-shadow:
+          0 26px 90px rgba(0, 0, 0, 0.46),
+          0 0 0 18px rgba(255, 255, 255, 0.16),
+          0 0 62px rgba(255, 207, 90, 0.4);
+      }
+    }
+
     .comment {
       position: absolute;
       left: var(--start-x);
@@ -413,8 +477,13 @@
     <div class="ground"></div>
   </main>
 
+  <audio id="bgm" src="data/window.mp3" loop preload="auto"></audio>
+  <button class="music-button" id="musicButton" type="button">음악 켜기</button>
+
   <script>
     const stage = document.querySelector("#stage");
+    const bgm = document.querySelector("#bgm");
+    const musicButton = document.querySelector("#musicButton");
     const googleSheetApiUrl = "https://script.google.com/macros/s/AKfycbwb7303tHjYbs3mjQOGe1o-fXVteukRX6yFPjkRb-SEBjKXKuOLN7R09M74BOtC2Wqs/exec";
     const dataSources = [
       googleSheetApiUrl,
@@ -584,6 +653,18 @@
       if (!comments.length) return;
       createComment(pick(comments));
     }
+
+    async function startMusic() {
+      try {
+        bgm.volume = 0.42;
+        await bgm.play();
+        musicButton.classList.add("hidden");
+      } catch (error) {
+        musicButton.textContent = "음악 시작";
+      }
+    }
+
+    musicButton.addEventListener("click", startMusic);
 
     addSparkles();
     loadData();
