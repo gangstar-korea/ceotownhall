@@ -345,7 +345,7 @@
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      font-size: clamp(14px, 1.05vw, 19px);
+      font-size: clamp(12px, 0.9vw, 16px);
       font-weight: 820;
       line-height: 1.36;
       overflow-wrap: anywhere;
@@ -455,31 +455,63 @@
       }
 
       .message {
-        min-width: 170px;
-        max-width: 62vw;
+        min-width: 150px;
+        max-width: 55vw;
+      }
+
+      .balloon-shape {
+        width: 32px;
+        height: 42px;
+      }
+
+      .plane-shape {
+        width: 52px;
+        height: 30px;
+      }
+
+      .string {
+        width: 20px;
+        height: 46px;
+        bottom: -50px;
+      }
+
+      .text {
+        font-size: clamp(10px, 0.8vw, 14px);
+      }
+
+      .meta {
+        font-size: clamp(9px, 0.7vw, 12px);
+      }
+
+      .avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
       }
     }
   </style>
 </head>
 <body>
   <main class="stage" id="stage" aria-live="polite">
-    <div class="topbar">
-      <div>
-        <p class="eyebrow">Live Comment Wall</p>
-        <h1>CEO타운홀 미팅</h1>
-      </div>
-    </div>
     <div class="center-prompt">여러분의 의견을 들려주세요.</div>
     <div class="ground"></div>
   </main>
 
-  <audio id="bgm" src="data/window.mp3" loop preload="auto"></audio>
+  <audio id="bgm" preload="auto"></audio>
   <button class="music-button" id="musicButton" type="button">음악 켜기</button>
 
   <script>
     const stage = document.querySelector("#stage");
     const bgm = document.querySelector("#bgm");
     const musicButton = document.querySelector("#musicButton");
+    const musicFiles = [
+      "data/start.mp3",
+      "data/go.mp3", 
+      "data/running.mp3",
+      "data/wego.mp3",
+      "data/window.mp3"
+    ];
+    let currentTrackIndex = 0;
     const googleSheetApiUrl = "https://script.google.com/macros/s/AKfycbwb7303tHjYbs3mjQOGe1o-fXVteukRX6yFPjkRb-SEBjKXKuOLN7R09M74BOtC2Wqs/exec";
     const dataSources = [
       googleSheetApiUrl,
@@ -650,9 +682,25 @@
       createComment(pick(comments));
     }
 
+    function loadNextTrack() {
+      bgm.src = musicFiles[currentTrackIndex];
+      bgm.load();
+    }
+
+    function playNextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % musicFiles.length;
+      loadNextTrack();
+      bgm.play().catch(() => {
+        // 재생 실패 시 다음 트랙으로
+        setTimeout(playNextTrack, 100);
+      });
+    }
+
     async function startMusic() {
       try {
         bgm.volume = 0.42;
+        bgm.addEventListener('ended', playNextTrack);
+        loadNextTrack();
         await bgm.play();
         musicButton.classList.add("hidden");
       } catch (error) {
